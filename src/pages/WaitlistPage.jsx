@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { movies } from '../data/catalog'
 import { useLibrary } from '../contexts/LibraryContext'
 import { useToast } from '../contexts/ToastContext'
