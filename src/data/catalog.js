@@ -1,4 +1,5 @@
 export const profileImage = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'
+export const featuredMovie = { slug: 'the-veil', title: 'The Veil', meta: 'Drama · Mystery · 2026', genre: 'Drama', duration: '2h 08m', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=85', synopsis: 'After returning to her childhood home, a woman begins to uncover the violent secret that kept her family apart for decades.' }
 
 export const movies = [
   { slug: 'the-silent-hour', title: 'The Silent Hour', meta: 'Drama · 2026', genre: 'Drama', duration: '1h 51m', image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=500&q=80', synopsis: 'A courtroom translator discovers that a defendant knows the one secret she thought was buried forever.' },
@@ -16,12 +17,12 @@ export const movies = [
 ]
 
 export const shows = [
-  { title: 'Night Shift', meta: '2 seasons', image: movies[2].image },
-  { title: 'The Peripheral', meta: '1 season', image: movies[1].image },
-  { title: 'Wild Bloom', meta: '3 seasons', image: movies[4].image },
-  { title: 'Interval', meta: '1 season', image: movies[7].image },
-  { title: 'Morrow', meta: '2 seasons', image: movies[9].image },
-  { title: 'The Blue Room', meta: '4 seasons', image: movies[6].image },
+  { slug: 'night-shift', title: 'Night Shift', meta: '2 seasons', image: movies[2].image },
+  { slug: 'the-peripheral', title: 'The Peripheral', meta: '1 season', image: movies[1].image },
+  { slug: 'wild-bloom', title: 'Wild Bloom', meta: '3 seasons', image: movies[4].image },
+  { slug: 'interval', title: 'Interval', meta: '1 season', image: movies[7].image },
+  { slug: 'morrow', title: 'Morrow', meta: '2 seasons', image: movies[9].image },
+  { slug: 'the-blue-room', title: 'The Blue Room', meta: '4 seasons', image: movies[6].image },
 ]
 
 export const notifications = [

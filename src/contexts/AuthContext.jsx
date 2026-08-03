@@ -17,7 +17,12 @@ export function AuthProvider({ children }) {
     writeStorage('user', nextUser)
   }
   const signOut = () => { setUser(null); window.localStorage.removeItem('noir.user') }
-  const value = useMemo(() => ({ user, isAuthenticated: Boolean(user), signIn, signUp, signOut }), [user])
+  const changePlan = (plan) => {
+    const nextUser = { ...user, plan }
+    setUser(nextUser)
+    writeStorage('user', nextUser)
+  }
+  const value = useMemo(() => ({ user, isAuthenticated: Boolean(user), signIn, signUp, signOut, changePlan }), [user])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

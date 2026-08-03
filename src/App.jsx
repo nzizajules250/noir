@@ -26,7 +26,7 @@ function Application() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const { message, dismissToast } = useToast()
   const currentPage = useMemo(() => Object.entries(routes).find(([, path]) => path === location.pathname)?.[0] ?? '', [location.pathname])
-  const navigate = (page) => { setNotificationsOpen(false); navigateTo(routes[page] ?? '/'); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const navigate = (page) => { setNotificationsOpen(false); navigateTo(routes[page] ?? page ?? '/'); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   useEffect(() => { setNotificationsOpen(false) }, [location.pathname])
   useEffect(() => { if (!message) return undefined; const timer = window.setTimeout(dismissToast, 3200); return () => window.clearTimeout(timer) }, [message, dismissToast])
   return <><div className="grain" /><Navbar activePage={currentPage} navigate={navigate} notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} /><Routes>
