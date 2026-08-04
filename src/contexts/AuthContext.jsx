@@ -1,33 +1,70 @@
-import { createContext, useContext, useMemo, useState } from 'react'
-import { readStorage, writeStorage } from '../services/storage'
+// contexts/AuthContext.jsx
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext(null)
-const defaultUser = { name: 'Amara Davis', email: 'amara@email.com', plan: 'Essential', memberSince: '2024' }
+const API = import.meta.env.VITE_API_URL
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => readStorage('user', null))
-  const signIn = ({ email }) => {
-    const nextUser = { ...defaultUser, email }
-    setUser(nextUser)
-    writeStorage('user', nextUser)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  const refreshUser = async () => {
+    const res = await fetch(`${API}/api/auth/me`, { credentials: 'include' })
+    if (!res.ok) {
+      setUser(null)
+      return null
+    }
+    const data = await res.json()
+    setUser(data)
+    return data
   }
-  const signUp = ({ name, email }) => {
-    const nextUser = { ...defaultUser, name, email, memberSince: new Date().getFullYear().toString() }
-    setUser(nextUser)
-    writeStorage('user', nextUser)
+
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false))
+  }, [])
+
+  const request = async (path, body) => {
+    const res = await fetch(`${API}/api/auth/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Something went wrong')
+    return data
   }
-  const signOut = () => { setUser(null); window.localStorage.removeItem('noir.user') }
-  const changePlan = (plan) => {
-    const nextUser = { ...user, plan }
-    setUser(nextUser)
-    writeStorage('user', nextUser)
+
+  const signUp = async (values) => {
+    const data = await request('signup', values)
+    setUser(data)
+    return data
   }
-  const value = useMemo(() => ({ user, isAuthenticated: Boolean(user), signIn, signUp, signOut, changePlan }), [user])
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+
+  const signIn = async (values) => {
+    const data = await request('signin', values)
+    setUser(data)
+    return data
+  }
+
+  const adminSignIn = async (values) => {
+    const data = await signIn(values)
+    if (!data.isAdmin) {
+      await request('signout', {})
+      setUser(null)
+      throw new Error('Admin access required')
+    }
+    return data
+  }
+
+  const signOut = async () => { await request('signout', {}); setUser(null) }
+  const changePlan = async (plan) => setUser((prev) => ({ ...prev, plan })) // real endpoint comes with Payments step
+
+  return (
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, signIn, signUp, adminSignIn, signOut, changePlan, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within AuthProvider')
-  return context
-}
+export const useAuth = () => useContext(AuthContext)

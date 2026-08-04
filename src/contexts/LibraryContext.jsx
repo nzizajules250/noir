@@ -1,28 +1,60 @@
-import { createContext, useContext, useMemo, useState } from 'react'
-import { movies } from '../data/catalog'
-import { readStorage, writeStorage } from '../services/storage'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useAuth } from './AuthContext'
 
 const LibraryContext = createContext(null)
-const initialWatchlist = movies.slice(0, 4).map((movie) => movie.title)
+const API = import.meta.env.VITE_API_URL
 
 export function LibraryProvider({ children }) {
-  const [watchlist, setWatchlist] = useState(() => readStorage('watchlist', initialWatchlist))
-  const [progress, setProgress] = useState(() => readStorage('progress', { Remainder: 42, 'In the Current': 68, 'The Orchard': 21 }))
-  const toggleWatchlist = (title) => {
-    setWatchlist((current) => {
-      const next = current.includes(title) ? current.filter((item) => item !== title) : [...current, title]
-      writeStorage('watchlist', next)
-      return next
-    })
+  const { isAuthenticated } = useAuth()
+  const [watchlist, setWatchlist] = useState([])
+  const [progress, setProgress] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setWatchlist([])
+      setProgress({})
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    fetch(`${API}/api/library`, { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : { watchlist: [], progress: {} }))
+      .then((data) => { setWatchlist(data.watchlist); setProgress(data.progress) })
+      .finally(() => setLoading(false))
+  }, [isAuthenticated])
+
+  const toggleWatchlist = async (title) => {
+    setWatchlist((current) => (current.includes(title) ? current.filter((item) => item !== title) : [...current, title]))
+    try {
+      const res = await fetch(`${API}/api/library/watchlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title }),
+      })
+      if (res.ok) setWatchlist((await res.json()).watchlist)
+    } catch {
+      setWatchlist((current) => (current.includes(title) ? current.filter((item) => item !== title) : [...current, title]))
+    }
   }
-  const saveProgress = (title, percentage) => {
-    setProgress((current) => {
-      const next = { ...current, [title]: percentage }
-      writeStorage('progress', next)
-      return next
-    })
+
+  const saveProgress = async (title, percentage) => {
+    setProgress((current) => ({ ...current, [title]: percentage }))
+    try {
+      const res = await fetch(`${API}/api/library/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title, percentage }),
+      })
+      if (res.ok) setProgress((await res.json()).progress)
+    } catch {
+      // percentage is non-critical UI state; leave the optimistic value in place rather than yanking it back
+    }
   }
-  const value = useMemo(() => ({ watchlist, progress, toggleWatchlist, saveProgress }), [watchlist, progress])
+
+  const value = useMemo(() => ({ watchlist, progress, toggleWatchlist, saveProgress, loading }), [watchlist, progress, loading])
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>
 }
 

@@ -14,11 +14,15 @@ import ContactPage from './pages/ContactPage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
 import PaymentPage from './pages/PaymentPage'
+import PaymentCallbackPage from './pages/PaymentCallbackPage'
+import AdminAuthPage from './pages/AdminAuthPage'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminRoute from './components/AdminRoute'
 import ProfilePage from './pages/ProfilePage'
 import VideoPlayerPage from './pages/VideoPlayerPage'
 import WaitlistPage from './pages/WaitlistPage'
 
-const routes = { home: '/', movies: '/movies', tvshows: '/tv-shows', contact: '/contact', login: '/login', signup: '/signup', profile: '/profile', waitlist: '/waitlist', payment: '/payment', videoplayer: '/watch/the-veil' }
+const routes = { home: '/', movies: '/movies', tvshows: '/tv-shows', contact: '/contact', login: '/login', signup: '/signup', profile: '/profile', waitlist: '/waitlist', payment: '/payment', admin: '/admin', videoplayer: '/watch/the-veil' }
 
 function Application() {
   const location = useLocation()
@@ -39,6 +43,9 @@ function Application() {
     <Route path="/profile" element={<ProtectedRoute><ProfilePage navigate={navigate} /></ProtectedRoute>} />
     <Route path="/waitlist" element={<ProtectedRoute><WaitlistPage /></ProtectedRoute>} />
     <Route path="/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+    <Route path="/payment/callback" element={<ProtectedRoute><PaymentCallbackPage navigate={navigate} /></ProtectedRoute>} />
+    <Route path="/admin" element={<AdminRoute><AdminDashboard navigate={navigate} /></AdminRoute>} />
+    <Route path="/admin/login" element={<AdminAuthPage navigate={navigate} />} />
     <Route path="/watch/:slug" element={<ProtectedRoute><VideoPlayerPage navigate={navigate} /></ProtectedRoute>} />
     <Route path="/watch" element={<Navigate to="/watch/the-veil" replace />} />
     <Route path="*" element={<NotFoundPage navigate={navigate} />} />
