@@ -34,7 +34,9 @@ coverage/
 
 # Vite
 vite.svg
-.env
+.env.*
+.env.example
+
 # Temporary files
 *.tmp
 *.temp
